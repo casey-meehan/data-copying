@@ -198,16 +198,18 @@ def precision_recall(T, Qm, angular_res = 100, n_clusters = 5, n_clusterings = 1
         #Fit a kmeans classifier on the joint set of training and generated pts
         km_clf = KMeans(n_clusters = n_clusters, n_init = 1).fit(np.concatenate((T, Qm), axis = 0))
 
-        #Get fraction of points in each cell 
+        #Get fraction of points in each cell for T 
         T_cells  = km_clf.predict(T)
-        labels, cts = np.unique(T_cells, return_counts = True) 
-        cts = cts[labels] #put in order of cell label 
-        T_of_pi = cts / l
+        cts_T = np.array([np.count_nonzero(T_cells == i) for i in range(n_clusters)])
+#        labels, cts = np.unique(T_cells, return_counts = True) 
+#        cts = cts[labels] #put in order of cell label 
+        T_of_pi = cts_T / l
 
         Qm_cells  = km_clf.predict(Qm)
-        labels, cts = np.unique(Qm_cells, return_counts = True) 
-        cts = cts[labels] #put in order of cell label 
-        Qm_of_pi = cts / m
+        cts_Qm = np.array([np.count_nonzero(Qm_cells == i) for i in range(n_clusters)])
+#        labels, cts = np.unique(Qm_cells, return_counts = True) 
+#        cts = cts[labels] #put in order of cell label 
+        Qm_of_pi = cts_Qm / m
 
         #compute PR curve 
         lam_T_of_pi = lams[:,None] * T_of_pi #angular_res X k matrix of \lamda * T_of_pi for all \lambda, \pi
