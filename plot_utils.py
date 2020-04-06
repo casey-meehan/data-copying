@@ -77,6 +77,10 @@ def plot_model_sweep(x_values, traces, trace_names, xlabel, ylabel, title,
         ax2.plot(x_values, log_lh, color='gray', label = '$\propto \log$Lik.')
         ax2.legend(loc = 'lower right') 
 
+    #plot the black dotted reference line 
+    if ref_value is not None: 
+        ax1.plot(x_values, np.ones(len(x_values))*ref_value, '--', color = 'black') 
+
     #plot each of the traces 
     for trace, name in zip(traces, trace_names): 
         trace_mean = trace.mean(axis = 1)
@@ -88,11 +92,9 @@ def plot_model_sweep(x_values, traces, trace_names, xlabel, ylabel, title,
                          + trace_std, alpha = 0.2) 
         #plot red dot at optimal sigma value 
         if log_lh is not None: 
-            ax1.plot([], [], color = 'gray') 
+#            ax1.plot([], [], color = 'gray') 
             ax1.plot(x_values[opt_sig_idx], trace_mean[opt_sig_idx], 'ro')
 
-    #plot the black dotted reference line 
-    ax1.plot(x_values, np.ones(len(x_values))*ref_value, '--', color = 'black') 
 
 
     #set legend
