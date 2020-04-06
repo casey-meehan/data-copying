@@ -73,9 +73,9 @@ def plot_model_sweep(x_values, traces, trace_names, xlabel, ylabel, title,
         log_lh = log_lh - np.sort(log_lh)[::-1][9]
         ax2 = ax1.twinx()
         ax2.get_yaxis().set_visible(False) #only show proportionality
+        ax2.set_yscale('log') #this is needed to make the maximum pronounced 
         ax2.plot(x_values, log_lh, color='gray', label = '$\propto \log$Lik.')
         ax2.legend(loc = 'lower right') 
-        ax2.set_yscale('log') #this is needed to make the maximum pronounced 
 
     #plot each of the traces 
     for trace, name in zip(traces, trace_names): 
@@ -88,6 +88,7 @@ def plot_model_sweep(x_values, traces, trace_names, xlabel, ylabel, title,
                          + trace_std, alpha = 0.2) 
         #plot red dot at optimal sigma value 
         if log_lh is not None: 
+            ax1.plot([], [], color = 'gray') 
             ax1.plot(x_values[opt_sig_idx], trace_mean[opt_sig_idx], 'ro')
 
     #plot the black dotted reference line 

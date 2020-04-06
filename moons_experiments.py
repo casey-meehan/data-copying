@@ -28,7 +28,7 @@ n = 1000 #number of test samples (Pn)
 num_trials = 10
 num_trials = 5 
 num_sigmas = 75
-num_sigmas = 10
+#num_sigmas = 10
 k = 5 #number of clusters in C_T test
 
 #Choose sigmas 
