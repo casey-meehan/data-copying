@@ -18,6 +18,7 @@ from sklearn.neighbors import KernelDensity
 from sklearn.datasets import make_moons
 from sklearn.cluster import KMeans
 from tqdm import tqdm 
+import plot_utils as plu
 
 print('Setting up testbench...')
 #experimental parameters
@@ -25,7 +26,9 @@ l = 2000 #number of training samples (T)
 m = 1000 #number of generated samples (Qm) 
 n = 1000 #number of test samples (Pn)
 num_trials = 10
+num_trials = 5 
 num_sigmas = 75
+num_sigmas = 10
 k = 5 #number of clusters in C_T test
 
 #Choose sigmas 
@@ -46,7 +49,7 @@ for i in range(len(sigmas)):
     log_lh[i] = Q.score(V)
 
 #get the MLE sigma
-opt_sigma = sigmas[np.argmax(log_lh)]
+opt_sig_idx = np.argmax(log_lh)
 
 #allocate space for each of the test statistics 
 
@@ -106,3 +109,21 @@ for sig_idx in tqdm(range(num_sigmas)):
         ct[sig_idx, trial_idx] = dct.C_T(Pn, Pn_labels, Qm, Qm_labels, T, T_labels, tau = 20 / len(Qm))
 
 print('Completed tests on {0:n} sigmas, {1:n} trials'.format(num_sigmas, num_trials))
+
+#now plot results of each test: 
+print('Plotting results and saving in ./images directory...') 
+
+#Plot two sample NN test
+NN_test_dict = {
+    'x_values': sigmas,
+    'traces': [T_LOO_acc, Qm_LOO_acc, (T_LOO_acc + Qm_LOO_acc)/2], 
+    'trace_names': ['$T$ acc', '$Q_m$ acc', 'Mean acc'], 
+    'xlabel': '$\sigma$', 
+    'ylabel': 'Accuracy', 
+    'title': 'Two Sample NN Statistic', 
+    'ref_value': 0.5, 
+    'log_lh': log_lh, 
+    'fname': 'NN_test_moons.png'
+}
+
+plu.plot_model_sweep(**NN_test_dict)
