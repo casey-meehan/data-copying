@@ -6,6 +6,20 @@ import matplotlib as mpl
 import numpy as np
 from matplotlib import pyplot as plt
 
+def set_plot_defaults(): 
+    """Sets up default plotting values for our figures
+    """
+    mpl.rcdefaults()
+    plt.rc('axes', labelsize=30)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=30)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=30)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=30)    # legend fontsize
+    plt.rc('figure', titlesize=30)  # fontsize of the figure title
+    plt.rc('legend', frameon = False) #don't add a box around legends
+    plt.rc('lines', linewidth = 4) #make lines thick enough to see 
+    plt.rc('axes', titlesize = 40) #make titles big enough to read
+
+
 #set plotting defaults 
 def plot_model_sweep(x_values, traces, trace_names, xlabel, ylabel, title,
         fname, ref_value = None, log_lh = None):
@@ -47,17 +61,8 @@ def plot_model_sweep(x_values, traces, trace_names, xlabel, ylabel, title,
     if len(x_values) < 10: 
         raise ValueError('Needs >=10 values to plot. x_values has only \
         {0:n} values'.format(len(x_values)))
-    #set plot format 
-    mpl.rcdefaults()
-    plt.rc('axes', labelsize=30)    # fontsize of the x and y labels
-    plt.rc('xtick', labelsize=30)    # fontsize of the tick labels
-    plt.rc('ytick', labelsize=30)    # fontsize of the tick labels
-    plt.rc('legend', fontsize=30)    # legend fontsize
-    plt.rc('figure', titlesize=30)  # fontsize of the figure title
-    plt.rc('legend', frameon = False) #don't add a box around legends
-    plt.rc('lines', linewidth = 4) #make lines thick enough to see 
-    plt.rc('axes', titlesize = 40) #make titles big enough to read
-    
+
+    set_plot_defaults()
     f, ax1 = plt.subplots(1,1)
     f.set_size_inches((12,6))
     ax1.set_xscale('log')
@@ -110,3 +115,64 @@ def plot_model_sweep(x_values, traces, trace_names, xlabel, ylabel, title,
     plt.savefig('./images/' + fname, bbox_inches = 'tight', pad_inches = 0)
     plt.show()
 
+def plot_PR_curve(sigmas, precisions, recalls, fname, opt_sigma, zoom = True):
+    """plots precision / recall curves for KDE test. Assumes the 
+    last sigma value is the MLE sigma 
+
+    Inputs: 
+        sigmas: [1 X num_sigmas] np array of KDE sigma values
+
+        precisions: [num_sigmas X num_trials X angular_res] np array of 
+            precision values
+
+        recalls: [num_sigmas X num_trials X angular_res] np array of 
+            recall values
+
+        fname: (string) file name for png stored in './images' directory 
+            (add .png to end) 
+
+        opt_sigma: (scalar) the MLE sigma value
+
+        zoom: (boolean) whether to zoom on the 'corner' of the PR curve 
+            (near 1,1) 
+    """
+    set_plot_defaults()
+
+    prec_curves_ave = precisions.mean(axis = 1)
+    prec_curves_std = precisions.std(axis = 1)
+    reca_curves_ave = recalls.mean(axis = 1)
+    reca_curves_std = recalls.std(axis = 1)
+
+    #plot each of the PR curves 
+    for i in range(len(sigmas)): 
+        pca = prec_curves_ave[i]
+        pcs = prec_curves_std[i]
+        rca = reca_curves_ave[i]
+        rcs = reca_curves_std[i]
+
+        #plot the MLE sigma with a dotted red line 
+        if(sigmas[i] == opt_sigma):
+            plt.plot(pca, rca, 'r--',label = 'MLE $\sigma$' )
+        else: 
+            plt.plot(pca, rca, label = '{0:0.2e}'.format(sigmas[i]))
+
+        plt.fill_between(pca, rca - rcs, rca + rcs, alpha = 0.05)
+        plt.fill_betweenx(rca, pca - pcs, pca + pcs, alpha = 0.05)
+
+    plt.gcf().set_size_inches((12,6))
+
+    #set axis ticks: 
+    tick_mod = 2
+    for i, tick in enumerate(plt.gca().xaxis.get_ticklabels()): 
+        if i % tick_mod != 0: 
+            tick.set_visible(False)
+
+    if zoom: 
+        plt.xlim(0.90, 0.96)
+        plt.ylim(0.90, 0.935)
+
+    plt.legend(frameon = False, loc = 'lower left', ncol = 2)
+    plt.xlabel('Precision')
+    plt.ylabel('Recall')
+    plt.title('Precision & Recall')
+    plt.savefig('./images/' + fname, bbox_inches = 'tight', pad_inches = 0)
