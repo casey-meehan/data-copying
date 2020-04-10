@@ -149,7 +149,7 @@ if do_NN_test:
         'trace_names': ['$T$ acc', '$Q_m$ acc', 'Mean acc'], 
         'xlabel': '$\sigma$', 
         'ylabel': 'Accuracy', 
-        'title': 'Two Sample NN Statistic', 
+        'title': 'Moons: Two Sample NN Statistic', 
         'ref_value': 0.5, 
         'log_lh': log_lh, 
         'fname': 'NN_test_moons.png'
@@ -164,7 +164,7 @@ if do_frechet_test:
         'trace_names': ['avg. frechet stat'], 
         'xlabel': '$\sigma$', 
         'ylabel': 'Frechet Statistic', 
-        'title': 'Frechet Statistic', 
+        'title': 'Moons: Frechet Statistic', 
         'ref_value': 0.0, 
         'log_lh': log_lh, 
         'fname': 'frechet_test_moons.png'
@@ -179,7 +179,7 @@ if do_binning_test:
         'trace_names': ['frac. cells over-rep\'d', 'frac. cells under-rep\'d'], 
         'xlabel': '$\sigma$', 
         'ylabel': 'Cell Representation', 
-        'title': 'Binning Based Evaluation', 
+        'title': 'Moons: Binning Based Evaluation', 
         'ref_value': 0.05, #significance level
         'log_lh': log_lh, 
         'fname': 'binning_test_moons.png'
@@ -206,7 +206,7 @@ if do_gg_test:
         'trace_names': ['$\log L(T) - \log L(P_n)$'], 
         'xlabel': '$\sigma$', 
         'ylabel': 'generalization gap', 
-        'title': 'Moons Dataset: Gen. Gap vs. KDE $\sigma$',
+        'title': 'Moons: Gen. Gap vs. KDE $\sigma$',
         'ref_value': 0.0, 
         'log_lh': log_lh, 
         'fname': 'gen_gap_test_moons.png'
@@ -222,7 +222,7 @@ if do_CT_test:
         'trace_names': ['$C_T(P_n, Q_m)$'],
         'xlabel': '$\sigma$', 
         'ylabel': '$C_T(P_n, Q_m)',
-        'title': 'Moons Dataset: $C_T$ vs. KDE $\sigma$',
+        'title': 'Moons: $C_T$ vs. KDE $\sigma$',
         'ref_value': 0.0, 
         'log_lh': log_lh, 
         'fname': 'C_T_test_moons.png'
