@@ -13,7 +13,7 @@ from sklearn.cluster import KMeans
 #Two-Sample NN Statistics#
 ##########################
 
-def NN_test(T, Qm): 
+def NN_test(T, Qm, n_LOO = None): 
     """run NN two-sample test on training and generated samples. As specified in the 
     related work section of the paper, we use the method of Xu et al. (2018) wherein 
     both the leave-one-out (LOO) accuracy of the training (T) and generated samples (Qm) 
@@ -25,6 +25,14 @@ def NN_test(T, Qm):
         T: (m x d) np array of m training samples, each of dimension d
 
         Qm: (m x d) np array of m training samples, each of dimension d
+
+        n_LOO: (int) Number of leave-one-out (LOO) tests to run on each
+            the generated and training samples. E.g. if T and Qm are
+            each size 10,000 and n_LOO=1000, then we check the nearest
+            neighbor label on 1000 random training samples (to get 
+            T_LOO_acc) and 1000 random generated samples (to get Qm_LOO_acc)
+
+            If None, then is all samples (=m). 
 
     Outputs: 
         T_LOO_acc: the LOO accuracy score for the training samples 
@@ -49,11 +57,19 @@ def NN_test(T, Qm):
     T_Qm = np.concatenate((T, Qm), axis = 0)
     T_Qm_labels = np.concatenate((T_labels, Qm_labels), axis = 0)
 
+    #Choose subsample to check LOO NN on (speeds up computation)
+    if n_LOO is not None: 
+        T_subsamp_idx = np.random.choice(np.arange(m), size = n_LOO, replace = False)
+        T = T[T_subsamp_idx]
+
+        Qm_subsamp_idx = np.random.choice(np.arange(m), size = n_LOO, replace = False)
+        Qm = Qm[Qm_subsamp_idx]
+
     #get nearest neighbors  
     NN_clf = NN(n_neighbors = 2).fit(T_Qm)
-    preds_T = NN_clf.kneighbors(T, n_neighbors = 2, return_distance = False)[:,1] #index of T nearest neighbs. 
+    preds_T = NN_clf.kneighbors(T, n_neighbors = 2, return_distance = False)[:,1] #index in T_Qm of T nearest neighbs. 
     preds_T = T_Qm_labels[preds_T] #label of T nearest neighbs
-    preds_Qm = NN_clf.kneighbors(Qm, n_neighbors = 2, return_distance = False)[:,1] #index of Qm nearest neighbs
+    preds_Qm = NN_clf.kneighbors(Qm, n_neighbors = 2, return_distance = False)[:,1] #index in T_Qm of Qm nearest neighbs
     preds_Qm = T_Qm_labels[preds_Qm] #label of Qm nearest neighbs
 
     #get accuracy NN accuracy for T and Qm. Ideal is ~0.5 for each 

@@ -115,7 +115,7 @@ for sig_idx in tqdm(range(num_sigmas)):
             NDB_over[sig_idx, trial_idx], NDB_under[sig_idx, trial_idx] = bln.binning_test(Qm, Qm_labels, T, T_labels) 
 
 
-        #Generalization Gap
+        #Generalization Gap (does not change with trial...)
         if do_gg_test: 
             gg[sig_idx, trial_idx] = bln.gen_gap(Pn, T, Q)
 

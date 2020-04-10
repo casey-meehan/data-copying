@@ -116,6 +116,9 @@ def C_T(Pn, Pn_cells, Qm, Qm_cells, T, T_cells, tau):
         T_cells: (1 X l) np array of integers indicating which of the 
             k cells each sample belongs to
 
+        tau: (scalar between 0 and 1) fraction of Qm samples that a
+            cell needs to be included in C_T statistic. 
+
     Outputs:
         C_T: The C_T statistic for the three samples Pn, Qm, T
     """
