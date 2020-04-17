@@ -176,3 +176,97 @@ def plot_PR_curve(sigmas, precisions, recalls, fname, opt_sigma, zoom = True):
     plt.ylabel('Recall')
     plt.title('Precision & Recall')
     plt.savefig('./images/' + fname, bbox_inches = 'tight', pad_inches = 0)
+
+def plot_VAE(d_vals, traces, trace_names, xlabel, ylabel, title,
+        fname, ref_value = None, ELBO = None):
+    """Produces all plots associated with VAE tests
+
+    Inputs 
+       d_vals: (1 X num VAEs) np array of the x-axis values: the VAE
+            latent dimension size from small to large. 
+
+       traces: list of (num VAEs X num_trials) np arrays, each 
+            representing one trace to be plotted. Each trace will be 
+            averaged across trials, and plotted with a 1-std dev error
+            buffer. 
+
+       trace_names: list of strings, each naming its corresponding 
+            trace in 'traces'. Appears next to each trace in the 
+            legend. 
+
+       xlabel: (string) label of x-axis values 
+
+       ylabel: (string) label of y-axis values 
+
+       title: (string) chart title
+
+       ref_value: scalar value indicating where on the y-axis to add
+            a horizontal black dotted line (as a reference value). If
+            =None, is ignored. 
+
+       ELBO: (1 X num VAEs) trace indicating the VAE ELBO measured
+            on held-out validation set for each of the VAEs. 
+            If None, is ignored. 
+
+       fname: (string) name of .png to be saved in the ./images/ 
+            directory 
+    """
+#    #check for number of elements: 
+#    if len(x_values) < 10: 
+#        raise ValueError('Needs >=10 values to plot. x_values has only \
+#        {0:n} values'.format(len(x_values)))
+
+    set_plot_defaults()
+    f, ax1 = plt.subplots(1,1)
+    f.set_size_inches((12,6))
+    ax1.set_xlabel(xlabel)
+    ax1.set_ylabel(ylabel)
+    ax1.set_title(title)
+    #flip x-axis to go from complex (ovefit) to small (underfit) 
+    ax1.set_xlim(1.05 * d_vals.max(), 0.95 * d_vals.min())
+
+    #plot log likelihood 
+    if ELBO is not None: 
+        #get max ELBO d_val idx
+        opt_dval_idx = np.argmax(ELBO)
+        #shift up to make all values > 0
+        ELBO = ELBO - ELBO.min() + 1
+        ax2 = ax1.twinx()
+        ax2.get_yaxis().set_visible(False) #only show proportionality
+        ax2.set_yscale('log') #this is needed to make the maximum pronounced 
+        ax2.plot(d_vals, ELBO, color='gray', label = '$\propto$ ELBO')
+        ax2.legend(loc = 'lower right') 
+
+    #plot the black dotted reference line 
+    if ref_value is not None: 
+        ax1.plot(d_vals, np.ones(len(d_vals))*ref_value, '--', color = 'black') 
+
+    #plot each of the traces 
+    for trace, name in zip(traces, trace_names): 
+        trace_mean = trace.mean(axis = 1)
+        trace_std = trace.std(axis = 1)
+        #plot the mean of all trials
+        ax1.plot(d_vals, trace_mean, label = name) 
+        #plot 1-std error buffer
+        ax1.fill_between(d_vals, trace_mean - trace_std, trace_mean 
+                         + trace_std, alpha = 0.2) 
+        #plot red dot at optimal sigma value 
+        if ELBO is not None: 
+#            ax1.plot([], [], color = 'gray') 
+            ax1.plot(d_vals[opt_dval_idx], trace_mean[opt_dval_idx], 'ro')
+
+
+
+    #set legend
+    ax1.legend()
+
+    #get rid of every other tick 
+#    tick_mod = 2
+#    for i, tick in enumerate(ax1.xaxis.get_ticklabels()): 
+#        if i % tick_mod != 0: 
+#            tick.set_visible(False)
+
+    #save & show figure 
+    plt.savefig('./images/' + fname, bbox_inches = 'tight', pad_inches = 0)
+    plt.show()
+

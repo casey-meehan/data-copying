@@ -125,17 +125,20 @@ def C_T(Pn, Pn_cells, Qm, Qm_cells, T, T_cells, tau):
 
     m = Qm.shape[0]
     n = Pn.shape[0]
+    k = np.max(np.unique(T_cells)) + 1 #number of cells
 
     #First, determine which of the cells have sufficient generated samples (Qm(pi) > tau) 
     labels, cts = np.unique(Qm_cells, return_counts = True) 
-    cts = cts[labels.astype(int)] #put in order of cell label 
-    Qm_of_pi = cts / m 
+    Qm_cts = np.zeros(k)
+    Qm_cts[labels.astype(int)] = cts #put in order of cell label 
+    Qm_of_pi = Qm_cts / m 
     Pi_tau = Qm_of_pi > tau #binary array selecting which cells have sufficient samples 
 
     #Get the fraction of test samples in each cell Pn(pi) 
     labels, cts = np.unique(Pn_cells, return_counts = True)  
-    cts = cts[labels.astype(int)] #put in order of cell label 
-    Pn_of_pi = cts / n 
+    Pn_cts = np.zeros(k)
+    Pn_cts[labels.astype(int)] = cts #put in order of cell label 
+    Pn_of_pi = Pn_cts / n 
 
     #Now get the in-cell Zu scores 
     Zu_scores = Zu_cells(Pn, Pn_cells, Qm, Qm_cells, T, T_cells)
